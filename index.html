@@ -15,16 +15,16 @@
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
   </style>
 </head>
-<body class="min-h-screen pb-12">
-  <div class="max-w-md mx-auto p-4 space-y-5">
+<body class="min-h-screen pb-20">
+  <div class="max-w-md mx-auto p-4 space-y-4">
     
-    <!-- Top Header -->
-    <header class="flex items-center justify-between pt-2">
+    <!-- Fixed Top Header -->
+    <header class="flex items-center justify-between pt-1">
       <div>
         <h1 class="text-xl font-black tracking-tight text-white flex items-center gap-2">
           <i class="fa-solid fa-fire text-amber-500"></i> StreakMaster
         </h1>
-        <p class="text-xs text-slate-400">Class-leading discipline tracking</p>
+        <p id="page-subtitle" class="text-xs text-slate-400">Class-leading discipline tracking</p>
       </div>
       <div class="flex items-center gap-2">
         <span id="level-badge" class="px-2.5 py-1 text-xs font-semibold bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 rounded-full">Lvl 1</span>
@@ -34,87 +34,153 @@
       </div>
     </header>
 
-    <!-- Discipline & Streak Dashboard -->
-    <div class="grid grid-cols-2 gap-3">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between shadow-lg">
-        <div class="text-xs font-medium text-slate-400 flex items-center justify-between">
-          <span>Active Streak</span>
-          <i class="fa-solid fa-bolt text-amber-400"></i>
+    <!-- ================= PAGE 1: TODAY (HABITS) ================= -->
+    <section id="page-today" class="space-y-4">
+      <!-- Quick Stats Cards -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+          <div class="text-xs font-medium text-slate-400 flex items-center justify-between">
+            <span>Streak</span>
+            <i class="fa-solid fa-bolt text-amber-400"></i>
+          </div>
+          <div class="mt-2">
+            <span id="current-streak" class="text-3xl font-extrabold text-white">0</span>
+            <span class="text-xs text-slate-400 ml-1">days</span>
+          </div>
+          <div class="text-[11px] text-slate-500 mt-1">100% daily check</div>
         </div>
-        <div class="mt-2">
-          <span id="current-streak" class="text-3xl font-extrabold text-white">0</span>
-          <span class="text-xs text-slate-400 ml-1">days</span>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+          <div class="text-xs font-medium text-slate-400 flex items-center justify-between">
+            <span>Discipline</span>
+            <i class="fa-solid fa-chart-line text-emerald-400"></i>
+          </div>
+          <div class="mt-2">
+            <span id="discipline-meter" class="text-3xl font-extrabold text-emerald-400">0%</span>
+          </div>
+          <div id="discipline-label" class="text-[11px] text-emerald-500 font-medium mt-1">Getting Started</div>
         </div>
-        <div class="text-[11px] text-slate-500 mt-1">Requires 100% daily tasks</div>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between shadow-lg">
-        <div class="text-xs font-medium text-slate-400 flex items-center justify-between">
-          <span>Discipline Score</span>
-          <i class="fa-solid fa-chart-line text-emerald-400"></i>
+      <!-- Habit Checklist -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-regular fa-calendar-check text-indigo-400"></i> Today's Habits
+          </h2>
+          <button onclick="openAddHabitModal()" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">
+            + New Habit
+          </button>
         </div>
-        <div class="mt-2">
-          <span id="discipline-meter" class="text-3xl font-extrabold text-emerald-400">0%</span>
+        <div id="habit-list" class="space-y-2.5">
+          <!-- Rendered by JS -->
         </div>
-        <div id="discipline-label" class="text-[11px] text-emerald-500 font-medium mt-1">Getting Started</div>
       </div>
-    </div>
+    </section>
 
-    <!-- Active Goal Banner -->
-    <div id="goal-container" class="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/20 rounded-2xl p-4 shadow-sm">
-      <div class="flex items-center justify-between">
-        <div>
-          <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Active Challenge</span>
-          <h3 id="goal-title" class="text-sm font-bold text-slate-200 mt-0.5">No Active Challenge</h3>
-        </div>
-        <button onclick="openGoalModal()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white rounded-lg transition-all">
-          Set Goal
-        </button>
-      </div>
-      <div id="goal-progress-bar-wrapper" class="hidden mt-3">
-        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-          <div id="goal-progress-bar" class="bg-indigo-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
-        </div>
-        <div class="flex justify-between items-center text-[10px] text-slate-400 mt-1.5">
-          <span id="goal-days-left">0 days remaining</span>
-          <span id="goal-target-streak">Target: 0 days</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Daily Habit Checklist -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-sm font-bold text-white flex items-center gap-2">
-          <i class="fa-regular fa-calendar-check text-indigo-400"></i> Today's Habits
+    <!-- ================= PAGE 2: GOALS & CHALLENGES ================= -->
+    <section id="page-goals" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+        <h2 class="text-sm font-bold text-white flex items-center gap-2 mb-2">
+          <i class="fa-solid fa-bullseye text-indigo-400"></i> Current Challenge
         </h2>
-        <button onclick="openAddHabitModal()" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">
-          + New Habit
-        </button>
+        <div id="goal-active-card" class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 text-center space-y-3">
+          <h3 id="goal-title" class="text-base font-bold text-slate-200">No Active Challenge</h3>
+          <p id="goal-desc" class="text-xs text-slate-400">Lock in a 7, 14, 21, or 30 day target. Miss a single day and your challenge breaks.</p>
+          <div id="goal-progress-bar-wrapper" class="hidden">
+            <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden mt-3">
+              <div id="goal-progress-bar" class="bg-indigo-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between items-center text-[11px] text-slate-400 mt-2">
+              <span id="goal-days-left">0 days left</span>
+              <span id="goal-target-streak">Target: 0 days</span>
+            </div>
+          </div>
+          <button onclick="openGoalModal()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white rounded-xl transition-all">
+            Set New Challenge
+          </button>
+        </div>
       </div>
-      <div id="habit-list" class="space-y-2.5">
-        <!-- Rendered by JS -->
-      </div>
-    </div>
 
-    <!-- Weekly Consistency Chart -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
-      <h2 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
-        <i class="fa-solid fa-chart-simple text-blue-400"></i> Weekly Consistency
-      </h2>
-      <div class="h-40">
-        <canvas id="weeklyChart"></canvas>
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg space-y-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved text-emerald-400"></i> Discipline Rules
+        </h3>
+        <ul class="text-xs text-slate-400 space-y-2 list-disc list-inside">
+          <li>Every daily habit must be completed for the day to count.</li>
+          <li>Missing even 1 habit resets your active challenge immediately.</li>
+          <li>Maintaining higher streaks levels up your profile tier.</li>
+        </ul>
       </div>
-    </div>
+    </section>
+
+    <!-- ================= PAGE 3: CALENDAR VIEW ================= -->
+    <section id="page-calendar" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+        <div class="flex items-center justify-between mb-3">
+          <h2 id="calendar-month-year" class="text-sm font-bold text-white">Month 2026</h2>
+          <div class="flex gap-1 text-xs">
+            <span class="inline-flex items-center gap-1 text-slate-400 text-[10px]"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Perfect</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-slate-500 mb-2">
+          <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+        </div>
+        <div id="calendar-grid" class="grid grid-cols-7 gap-1.5 text-center text-xs">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PAGE 4: ANALYTICS & BADGES ================= -->
+    <section id="page-analytics" class="hidden space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+        <h2 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-chart-simple text-blue-400"></i> Weekly Activity
+        </h2>
+        <div class="h-44">
+          <canvas id="weeklyChart"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+        <h2 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-medal text-amber-400"></i> Milestone Badges
+        </h2>
+        <div class="grid grid-cols-3 gap-2 text-center" id="badges-container">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
 
   </div>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-slate-950/90 backdrop-blur-md border-t border-slate-800 py-2 px-6 flex justify-between items-center z-40">
+    <button onclick="switchTab('today')" id="tab-btn-today" class="flex flex-col items-center gap-1 text-indigo-400">
+      <i class="fa-solid fa-square-check text-base"></i>
+      <span class="text-[10px] font-semibold">Today</span>
+    </button>
+    <button onclick="switchTab('goals')" id="tab-btn-goals" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300">
+      <i class="fa-solid fa-bullseye text-base"></i>
+      <span class="text-[10px] font-semibold">Goals</span>
+    </button>
+    <button onclick="switchTab('calendar')" id="tab-btn-calendar" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300">
+      <i class="fa-regular fa-calendar-days text-base"></i>
+      <span class="text-[10px] font-semibold">Calendar</span>
+    </button>
+    <button onclick="switchTab('analytics')" id="tab-btn-analytics" class="flex flex-col items-center gap-1 text-slate-500 hover:text-slate-300">
+      <i class="fa-solid fa-chart-pie text-base"></i>
+      <span class="text-[10px] font-semibold">Stats</span>
+    </button>
+  </nav>
 
   <!-- Modals -->
   <!-- Set Goal Modal -->
   <div id="goal-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xs p-5 space-y-4">
       <h3 class="text-sm font-bold text-white">Select Challenge Duration</h3>
-      <p class="text-xs text-slate-400">If you miss a single day during this period, the goal resets.</p>
+      <p class="text-xs text-slate-400">If you miss a single day, your streak and challenge reset to 0.</p>
       <div class="grid grid-cols-2 gap-2">
         <button onclick="setChallenge(7)" class="p-2.5 bg-slate-800 hover:bg-indigo-600 rounded-xl text-xs font-semibold text-white">7 Days</button>
         <button onclick="setChallenge(14)" class="p-2.5 bg-slate-800 hover:bg-indigo-600 rounded-xl text-xs font-semibold text-white">14 Days</button>
@@ -138,7 +204,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'streakmaster_data_v1';
+    const STORAGE_KEY = 'streakmaster_data_v2';
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     function playBeep(freq = 600, duration = 0.08) {
@@ -178,6 +244,25 @@
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
+    // Tab Navigation
+    function switchTab(tab) {
+      const pages = ['today', 'goals', 'calendar', 'analytics'];
+      pages.forEach(p => {
+        document.getElementById(`page-${p}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-btn-${p}`);
+        btn.classList.remove('text-indigo-400');
+        btn.classList.add('text-slate-500');
+      });
+
+      document.getElementById(`page-${tab}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tab}`);
+      activeBtn.classList.remove('text-slate-500');
+      activeBtn.classList.add('text-indigo-400');
+
+      if (tab === 'analytics') updateChart();
+      if (tab === 'calendar') renderCalendar();
+    }
+
     function toggleHabit(id) {
       const today = getTodayKey();
       if (!state.history[today]) state.history[today] = [];
@@ -193,11 +278,22 @@
         state.xp = Math.max(0, state.xp - 10);
       }
 
-      // Check if perfect day reached
       if (state.history[today].length === state.habits.length && state.habits.length > 0) {
         confetti({ particleCount: 60, spread: 60, origin: { y: 0.8 } });
       }
 
+      saveState();
+    }
+
+    function deleteHabit(id, event) {
+      event.stopPropagation();
+      const habit = state.habits.find(h => h.id === id);
+      if (!confirm(`Are you sure you want to delete "${habit ? habit.title : 'this habit'}"?`)) return;
+      
+      state.habits = state.habits.filter(h => h.id !== id);
+      for (const date in state.history) {
+        state.history[date] = state.history[date].filter(hId => hId !== id);
+      }
       saveState();
     }
 
@@ -256,9 +352,10 @@
       if (state.goal && state.goal.status === 'active') {
         goalBox.classList.remove('hidden');
         document.getElementById('goal-title').textContent = `${state.goal.targetDays}-Day Iron Challenge`;
+        document.getElementById('goal-desc').textContent = 'Maintain 100% daily discipline to conquer this challenge.';
         const pct = Math.min(100, Math.round((streak / state.goal.targetDays) * 100));
         document.getElementById('goal-progress-bar').style.width = `${pct}%`;
-        document.getElementById('goal-days-left').textContent = `${Math.max(0, state.goal.targetDays - streak)} days remaining`;
+        document.getElementById('goal-days-left').textContent = `${Math.max(0, state.goal.targetDays - streak)} days left`;
         document.getElementById('goal-target-streak').textContent = `Target: ${state.goal.targetDays} days`;
       } else {
         goalBox.classList.add('hidden');
@@ -282,19 +379,85 @@
             </div>
             <span class="text-xs font-semibold ${isDone ? 'line-through opacity-70' : ''}">${h.title}</span>
           </div>
-          <div class="w-5 h-5 rounded-md border flex items-center justify-center ${isDone ? 'bg-indigo-600 border-indigo-500 text-white' : 'border-slate-600'}">
-            ${isDone ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
+          <div class="flex items-center gap-2">
+            <button onclick="deleteHabit('${h.id}', event)" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition-colors">
+              <i class="fa-regular fa-trash-can text-xs"></i>
+            </button>
+            <div class="w-5 h-5 rounded-md border flex items-center justify-center ${isDone ? 'bg-indigo-600 border-indigo-500 text-white' : 'border-slate-600'}">
+              ${isDone ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
+            </div>
           </div>
         `;
         listEl.appendChild(item);
       });
 
-      updateChart();
+      renderBadges(streak);
+    }
+
+    // Render Calendar
+    function renderCalendar() {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = d.getMonth();
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      document.getElementById('calendar-month-year').textContent = `${monthNames[month]} ${year}`;
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const grid = document.getElementById('calendar-grid');
+      grid.innerHTML = '';
+
+      for (let i = 0; i < firstDay; i++) {
+        grid.innerHTML += `<div class="p-2"></div>`;
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isPerfect = (state.history[dateKey] || []).length === state.habits.length && state.habits.length > 0;
+        const isToday = dateKey === getTodayKey();
+
+        grid.innerHTML += `
+          <div class="h-9 flex flex-col items-center justify-center rounded-lg border text-xs font-medium ${
+            isPerfect ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300 font-bold' : 
+            isToday ? 'bg-indigo-950/60 border-indigo-500 text-indigo-200' : 'bg-slate-800/40 border-slate-700/40 text-slate-400'
+          }">
+            ${day}
+          </div>
+        `;
+      }
+    }
+
+    // Render Milestone Badges
+    function renderBadges(streak) {
+      const badgesContainer = document.getElementById('badges-container');
+      if (!badgesContainer) return;
+      const list = [
+        { label: '3-Day Spark', target: 3, icon: 'fa-fire' },
+        { label: '7-Day Titan', target: 7, icon: 'fa-shield' },
+        { label: '14-Day Iron', target: 14, icon: 'fa-trophy' },
+        { label: '21-Day Habit', target: 21, icon: 'fa-crown' },
+        { label: '30-Day Master', target: 30, icon: 'fa-gem' },
+        { label: 'Century 100', target: 100, icon: 'fa-award' }
+      ];
+
+      badgesContainer.innerHTML = '';
+      list.forEach(b => {
+        const unlocked = streak >= b.target;
+        badgesContainer.innerHTML += `
+          <div class="p-3 rounded-xl border ${unlocked ? 'bg-indigo-950/40 border-indigo-500/40 text-indigo-300' : 'bg-slate-800/40 border-slate-800 text-slate-600'}">
+            <i class="fa-solid ${b.icon} text-lg mb-1 ${unlocked ? 'text-amber-400' : 'text-slate-600'}"></i>
+            <div class="text-[10px] font-bold">${b.label}</div>
+            <div class="text-[9px] ${unlocked ? 'text-emerald-400' : 'text-slate-600'}">${unlocked ? 'Unlocked' : `${b.target}d goal`}</div>
+          </div>
+        `;
+      });
     }
 
     let chartInstance = null;
     function updateChart() {
-      const ctx = document.getElementById('weeklyChart').getContext('2d');
+      const canvas = document.getElementById('weeklyChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
       const labels = [];
       const data = [];
 
