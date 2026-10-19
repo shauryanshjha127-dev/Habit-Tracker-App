@@ -8,8 +8,8 @@ StreakMaster is a strict, cross-platform habit tracking application built with w
 <br/>
 
 <!-- Direct Download Badges -->
-[![Download Android APK](https://img.shields.io/badge/📥_Download-Android_APK-059669?style=for-the-badge&logo=android&logoColor=white)](https://github.com/shauryanshjha127-dev/Habit-Tracker-App/releases)
-[![Download Windows PC](https://img.shields.io/badge/💻_Download-Windows_PC-4f46e5?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/shauryanshjha127-dev/Habit-Tracker-App/releases)
+[![Download Android APK](https://img.shields.io/badge/📥_Download-HabitTracker.apk-059669?style=for-the-badge&logo=android&logoColor=white)](https://github.com/shauryanshjha127-dev/Habit-Tracker-App/releases)
+[![Download Windows PC](https://img.shields.io/badge/💻_Download-HabitTracker.exe-4f46e5?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/shauryanshjha127-dev/Habit-Tracker-App/releases)
 
 <br/>
 
@@ -27,8 +27,8 @@ Sabhi latest downloads paane ke liye niche diye gaye link par click karein:
 
 👉 **[Go to Latest Releases Page (Download APK & PC)](https://github.com/shauryanshjha127-dev/Habit-Tracker-App/releases)**
 
-- 📱 **Android**: `app-debug.apk` download karke phone mein install karein (*"Install unknown apps"* enable karein).
-- 💻 **Windows**: `HabitMaster-Windows-PC.zip` download karein, extract karein aur `Habit & Streak Master.exe` run karein.
+- 📱 **Android**: `HabitTracker.apk` download karke phone mein install karein (*"Install unknown apps"* enable karein).
+- 💻 **Windows**: `HabitTracker.exe` download karein aur direct run karein.
 
 ---
 
@@ -89,3 +89,5 @@ npm install
 
 # Run desktop version locally
 npm start
+
+This project is licensed under the MIT License.
