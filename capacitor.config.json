@@ -1,0 +1,6 @@
+{
+  "appId": "com.habittracker.app",
+  "appName": "Habit & Streak Master",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
