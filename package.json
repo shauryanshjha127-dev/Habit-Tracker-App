@@ -1,11 +1,31 @@
 {
   "name": "habit-tracker-app",
   "version": "1.0.0",
+  "description": "StreakMaster Discipline App for Android and Windows",
+  "main": "main.js",
+  "author": "Shauryansh",
   "private": true,
-  "description": "Streak Master Android App via Capacitor",
+  "scripts": {
+    "start": "electron ."
+  },
   "dependencies": {
     "@capacitor/android": "^6.0.0",
     "@capacitor/cli": "^6.0.0",
     "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "electron": "^29.1.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.habittracker.app",
+    "productName": "Habit & Streak Master",
+    "win": {
+      "target": "dir"
+    },
+    "files": [
+      "index.html",
+      "main.js"
+    ]
   }
 }
