@@ -18,13 +18,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Electron & Packager
-        run: |
-          npm install electron electron-builder --save-dev
+      - name: Install Dependencies
+        run: npm install
 
       - name: Package Windows Executable
-        run: |
-          npx electron-builder --windows dir
+        run: npx electron-builder --win --dir
 
       - name: Upload Windows App Artifact
         uses: actions/upload-artifact@v4
