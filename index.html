@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Habit & Streak Master</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { background-color: #0b1120; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  </style>
+</head>
+<body class="min-h-screen pb-12">
+  <div class="max-w-md mx-auto p-4 space-y-5">
+    
+    <!-- Top Header -->
+    <header class="flex items-center justify-between pt-2">
+      <div>
+        <h1 class="text-xl font-black tracking-tight text-white flex items-center gap-2">
+          <i class="fa-solid fa-fire text-amber-500"></i> StreakMaster
+        </h1>
+        <p class="text-xs text-slate-400">Class-leading discipline tracking</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="level-badge" class="px-2.5 py-1 text-xs font-semibold bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 rounded-full">Lvl 1</span>
+        <button onclick="resetDataPrompt()" class="p-2 text-slate-400 hover:text-rose-400 text-sm">
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Discipline & Streak Dashboard -->
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between shadow-lg">
+        <div class="text-xs font-medium text-slate-400 flex items-center justify-between">
+          <span>Active Streak</span>
+          <i class="fa-solid fa-bolt text-amber-400"></i>
+        </div>
+        <div class="mt-2">
+          <span id="current-streak" class="text-3xl font-extrabold text-white">0</span>
+          <span class="text-xs text-slate-400 ml-1">days</span>
+        </div>
+        <div class="text-[11px] text-slate-500 mt-1">Requires 100% daily tasks</div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between shadow-lg">
+        <div class="text-xs font-medium text-slate-400 flex items-center justify-between">
+          <span>Discipline Score</span>
+          <i class="fa-solid fa-chart-line text-emerald-400"></i>
+        </div>
+        <div class="mt-2">
+          <span id="discipline-meter" class="text-3xl font-extrabold text-emerald-400">0%</span>
+        </div>
+        <div id="discipline-label" class="text-[11px] text-emerald-500 font-medium mt-1">Getting Started</div>
+      </div>
+    </div>
+
+    <!-- Active Goal Banner -->
+    <div id="goal-container" class="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/20 rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">Active Challenge</span>
+          <h3 id="goal-title" class="text-sm font-bold text-slate-200 mt-0.5">No Active Challenge</h3>
+        </div>
+        <button onclick="openGoalModal()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white rounded-lg transition-all">
+          Set Goal
+        </button>
+      </div>
+      <div id="goal-progress-bar-wrapper" class="hidden mt-3">
+        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+          <div id="goal-progress-bar" class="bg-indigo-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] text-slate-400 mt-1.5">
+          <span id="goal-days-left">0 days remaining</span>
+          <span id="goal-target-streak">Target: 0 days</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Habit Checklist -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-sm font-bold text-white flex items-center gap-2">
+          <i class="fa-regular fa-calendar-check text-indigo-400"></i> Today's Habits
+        </h2>
+        <button onclick="openAddHabitModal()" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">
+          + New Habit
+        </button>
+      </div>
+      <div id="habit-list" class="space-y-2.5">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Weekly Consistency Chart -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
+      <h2 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
+        <i class="fa-solid fa-chart-simple text-blue-400"></i> Weekly Consistency
+      </h2>
+      <div class="h-40">
+        <canvas id="weeklyChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modals -->
+  <!-- Set Goal Modal -->
+  <div id="goal-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xs p-5 space-y-4">
+      <h3 class="text-sm font-bold text-white">Select Challenge Duration</h3>
+      <p class="text-xs text-slate-400">If you miss a single day during this period, the goal resets.</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="setChallenge(7)" class="p-2.5 bg-slate-800 hover:bg-indigo-600 rounded-xl text-xs font-semibold text-white">7 Days</button>
+        <button onclick="setChallenge(14)" class="p-2.5 bg-slate-800 hover:bg-indigo-600 rounded-xl text-xs font-semibold text-white">14 Days</button>
+        <button onclick="setChallenge(21)" class="p-2.5 bg-slate-800 hover:bg-indigo-600 rounded-xl text-xs font-semibold text-white">21 Days</button>
+        <button onclick="setChallenge(30)" class="p-2.5 bg-slate-800 hover:bg-indigo-600 rounded-xl text-xs font-semibold text-white">30 Days</button>
+      </div>
+      <button onclick="closeGoalModal()" class="w-full text-center text-xs text-slate-400 mt-2">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Add Habit Modal -->
+  <div id="add-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xs p-5 space-y-3">
+      <h3 class="text-sm font-bold text-white">Add New Habit</h3>
+      <input type="text" id="new-habit-name" placeholder="e.g. Read 15 pages" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-indigo-500">
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeAddHabitModal()" class="flex-1 py-2 bg-slate-800 text-xs text-slate-300 font-semibold rounded-xl">Cancel</button>
+        <button onclick="addHabit()" class="flex-1 py-2 bg-indigo-600 text-xs text-white font-semibold rounded-xl">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'streakmaster_data_v1';
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playBeep(freq = 600, duration = 0.08) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    const defaultHabits = [
+      { id: '1', title: 'Deep Study / Work', icon: 'fa-book-open' },
+      { id: '2', title: 'Coding Practice', icon: 'fa-code' },
+      { id: '3', title: 'Physical Workout', icon: 'fa-dumbbell' },
+      { id: '4', title: 'Drink 3L Water', icon: 'fa-droplet' }
+    ];
+
+    let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+      habits: defaultHabits,
+      history: {},
+      goal: null,
+      xp: 0
+    };
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      render();
+    }
+
+    function getTodayKey() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function toggleHabit(id) {
+      const today = getTodayKey();
+      if (!state.history[today]) state.history[today] = [];
+      
+      const index = state.history[today].indexOf(id);
+      if (index === -1) {
+        state.history[today].push(id);
+        playBeep(650, 0.07);
+        state.xp += 10;
+      } else {
+        state.history[today].splice(index, 1);
+        playBeep(300, 0.07);
+        state.xp = Math.max(0, state.xp - 10);
+      }
+
+      // Check if perfect day reached
+      if (state.history[today].length === state.habits.length && state.habits.length > 0) {
+        confetti({ particleCount: 60, spread: 60, origin: { y: 0.8 } });
+      }
+
+      saveState();
+    }
+
+    function calculateStreak() {
+      let streak = 0;
+      let d = new Date();
+      const todayKey = getTodayKey();
+      
+      const todayDone = (state.history[todayKey] || []).length === state.habits.length && state.habits.length > 0;
+      if (todayDone) streak++;
+
+      while (true) {
+        d.setDate(d.getDate() - 1);
+        const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const done = (state.history[k] || []).length === state.habits.length && state.habits.length > 0;
+        if (done) streak++;
+        else break;
+      }
+      return streak;
+    }
+
+    function updateGoalCheck(currentStreak) {
+      if (!state.goal) return;
+      if (state.goal.status === 'active') {
+        if (currentStreak >= state.goal.targetDays) {
+          state.goal.status = 'completed';
+          confetti({ particleCount: 100, spread: 80 });
+        }
+      }
+    }
+
+    function render() {
+      const today = getTodayKey();
+      const completedToday = state.history[today] || [];
+      const streak = calculateStreak();
+      updateGoalCheck(streak);
+
+      // Streaks & Meter
+      document.getElementById('current-streak').textContent = streak;
+      const totalChecksWeek = 7 * state.habits.length;
+      let actualChecksWeek = 0;
+      for (let i = 0; i < 7; i++) {
+        let d = new Date();
+        d.setDate(d.getDate() - i);
+        const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        actualChecksWeek += (state.history[k] || []).length;
+      }
+      const discScore = totalChecksWeek > 0 ? Math.round((actualChecksWeek / totalChecksWeek) * 100) : 0;
+      document.getElementById('discipline-meter').textContent = `${discScore}%`;
+
+      const level = Math.floor(state.xp / 100) + 1;
+      document.getElementById('level-badge').textContent = `Lvl ${level}`;
+
+      // Goal UI
+      const goalBox = document.getElementById('goal-progress-bar-wrapper');
+      if (state.goal && state.goal.status === 'active') {
+        goalBox.classList.remove('hidden');
+        document.getElementById('goal-title').textContent = `${state.goal.targetDays}-Day Iron Challenge`;
+        const pct = Math.min(100, Math.round((streak / state.goal.targetDays) * 100));
+        document.getElementById('goal-progress-bar').style.width = `${pct}%`;
+        document.getElementById('goal-days-left').textContent = `${Math.max(0, state.goal.targetDays - streak)} days remaining`;
+        document.getElementById('goal-target-streak').textContent = `Target: ${state.goal.targetDays} days`;
+      } else {
+        goalBox.classList.add('hidden');
+        document.getElementById('goal-title').textContent = state.goal?.status === 'completed' ? 'Challenge Completed!' : 'No Active Challenge';
+      }
+
+      // Habits
+      const listEl = document.getElementById('habit-list');
+      listEl.innerHTML = '';
+      state.habits.forEach(h => {
+        const isDone = completedToday.includes(h.id);
+        const item = document.createElement('div');
+        item.className = `flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
+          isDone ? 'bg-indigo-950/40 border-indigo-500/40 text-indigo-200' : 'bg-slate-800/60 border-slate-700/60 text-slate-300'
+        }`;
+        item.onclick = () => toggleHabit(h.id);
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-7 h-7 rounded-lg flex items-center justify-center ${isDone ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400'} text-xs">
+              <i class="fa-solid ${h.icon || 'fa-check'}"></i>
+            </div>
+            <span class="text-xs font-semibold ${isDone ? 'line-through opacity-70' : ''}">${h.title}</span>
+          </div>
+          <div class="w-5 h-5 rounded-md border flex items-center justify-center ${isDone ? 'bg-indigo-600 border-indigo-500 text-white' : 'border-slate-600'}">
+            ${isDone ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
+          </div>
+        `;
+        listEl.appendChild(item);
+      });
+
+      updateChart();
+    }
+
+    let chartInstance = null;
+    function updateChart() {
+      const ctx = document.getElementById('weeklyChart').getContext('2d');
+      const labels = [];
+      const data = [];
+
+      for (let i = 6; i >= 0; i--) {
+        let d = new Date();
+        d.setDate(d.getDate() - i);
+        labels.push(d.toLocaleDateString('en-US', { weekday: 'narrow' }));
+        const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        data.push((state.history[k] || []).length);
+      }
+
+      if (chartInstance) chartInstance.destroy();
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data,
+            backgroundColor: '#6366f1',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, max: Math.max(state.habits.length, 4), grid: { color: '#1e293b' }, ticks: { color: '#64748b', stepSize: 1 } },
+            x: { grid: { display: false }, ticks: { color: '#64748b' } }
+          }
+        }
+      });
+    }
+
+    function openGoalModal() { document.getElementById('goal-modal').classList.remove('hidden'); }
+    function closeGoalModal() { document.getElementById('goal-modal').classList.add('hidden'); }
+    function setChallenge(days) {
+      state.goal = { targetDays: days, status: 'active', startDate: getTodayKey() };
+      closeGoalModal();
+      saveState();
+    }
+
+    function openAddHabitModal() { document.getElementById('add-modal').classList.remove('hidden'); }
+    function closeAddHabitModal() { document.getElementById('add-modal').classList.add('hidden'); }
+    function addHabit() {
+      const val = document.getElementById('new-habit-name').value.trim();
+      if (!val) return;
+      state.habits.push({ id: Date.now().toString(), title: val, icon: 'fa-check' });
+      document.getElementById('new-habit-name').value = '';
+      closeAddHabitModal();
+      saveState();
+    }
+
+    function resetDataPrompt() {
+      if (confirm('Reset streaks and clear history?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        location.reload();
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
